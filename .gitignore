@@ -1,0 +1,62 @@
+# Build & CMake
+/build/
+build*/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+CMakeUserPresets.json
+CMakePresets.json.user
+compile_commands.json
+Testing/
+DartConfiguration.tcl
+_install/
+_install-*/
+
+# IDEs & OS
+.vscode/
+.idea/
+*.iml
+*.suo
+*.user
+*.vcxproj*
+*.code-workspace
+.DS_Store
+Thumbs.db
+
+# Artifacts & outputs
+/artifacts/
+/dist/
+/tmp/
+/logs/
+
+# Binaries & objects
+*.o
+*.obj
+*.lo
+*.la
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+*.exe
+*.out
+*.app
+*.dSYM/
+
+# Bench/coverage
+*.profraw
+*.profdata
+coverage/
+lcov.info
+
+# Docker
+docker/*.tar
+
+# Python helper scripts
+__pycache__/
+*.pyc
+
+# Data files
+*.csv        # Ignore all CSVs by default
+!data/samples/*.csv   # But keep sample CSVs in version control
