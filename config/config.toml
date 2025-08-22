@@ -1,0 +1,37 @@
+[input]
+path = "data/samples/simple.csv"
+delimiter = ","
+quote = "\""
+escape = "\\"
+has_header = true
+assume_rfc4180 = true
+max_line_length = 1048576     # guardrail
+
+[sampling]
+sample_frac = 0.10
+max_sample_rows = 200000
+
+[nulls]
+values = ["", "NA", "N/A", "null", "NULL"]
+
+[types]
+force = { }                   # e.g., amount = "float64", id = "int64"
+coerce = true                 # attempt safe coercions
+date_formats = ["%Y-%m-%d", "%m/%d/%Y"]
+
+[columns]
+include = []                  # empty -> all
+exclude = []                  # wins over include
+
+[profilers]
+topk = 20
+hist_bins = 32
+quantiles = [0.5, 0.95]
+
+[output]
+root = "artifacts"
+project_id = "quick-reporter-{{yyyy}}{{mm}}{{dd}}-{{HH}}{{MM}}{{SS}}"
+
+[perf]
+chunk_bytes = 262144          # 128–512 KiB supported
+threads = 1                   # baseline single-thread

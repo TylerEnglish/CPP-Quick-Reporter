@@ -1,0 +1,36 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": { "major": 3, "minor": 24 },
+  "configurePresets": [
+    {
+      "name": "dev",
+      "displayName": "Dev (Debug)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CSVQR_BUILD_TESTS": "ON",
+        "CSVQR_BUILD_BENCH": "ON"
+      }
+    },
+    {
+      "name": "release",
+      "displayName": "Release (O3)",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CSVQR_BUILD_TESTS": "ON",
+        "CSVQR_BUILD_BENCH": "ON",
+        "CSVQR_ENABLE_SANITIZERS": "OFF"
+      }
+    }
+  ],
+  "buildPresets": [
+    { "name": "dev", "configurePreset": "dev" },
+    { "name": "release", "configurePreset": "release" }
+  ],
+  "testPresets": [
+    { "name": "dev", "configurePreset": "dev" }
+  ]
+}

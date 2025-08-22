@@ -1,0 +1,26 @@
+{
+  "version": "1",
+  "started_at": "2025-01-01T00:00:00Z",
+  "ended_at": "2025-01-01T00:00:10Z",
+  "wall_time_ms": 10000,
+  "rows": 100,
+  "input_bytes": 2048,
+  "throughput_input_mb_s": 0.2,
+  "rss_peak_mb": 50.0,
+  "cpu_user_pct": 80.0,
+  "cpu_sys_pct": 5.0,
+  "errors": 0,
+  "build": { "type": "Release", "flags": "-O3" },
+  "host": { "os": "windows", "arch": "x86_64" },
+  "stages": [
+    { "name": "read_chunks", "calls": 4, "p50_ms": 2.0, "p95_ms": 3.5, "bytes_in": 2048, "bytes_out": 2048, "rows_in": 0, "rows_out": 0 },
+    { "name": "tokenize_csv", "calls": 4, "p50_ms": 3.0, "p95_ms": 5.0, "bytes_in": 2048, "bytes_out": 2048, "rows_in": 0, "rows_out": 100 },
+    { "name": "type_infer", "calls": 1, "p50_ms": 1.0, "p95_ms": 1.0, "bytes_in": null, "bytes_out": null, "rows_in": 100, "rows_out": 100 },
+    { "name": "profile_columns", "calls": 3, "p50_ms": 2.0, "p95_ms": 3.0, "bytes_in": null, "bytes_out": null, "rows_in": 100, "rows_out": 100 }
+  ],
+  "samples": [
+    { "ts_ms": 0, "rss_mb": 40.0, "cpu_pct": 20.0, "bytes_in": 0, "bytes_out": 0 },
+    { "ts_ms": 5000, "rss_mb": 50.0, "cpu_pct": 85.0, "bytes_in": 1024, "bytes_out": 0 },
+    { "ts_ms": 10000, "rss_mb": 48.0, "cpu_pct": 10.0, "bytes_in": 2048, "bytes_out": 0 }
+  ]
+}
