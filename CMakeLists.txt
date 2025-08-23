@@ -68,10 +68,10 @@ if(NOT mustache_src_POPULATED)
 endif()
 
 add_library(mustache_headers INTERFACE)
-target_include_directories(mustache_headers INTERFACE "${mustache_src_SOURCE_DIR}/include")
-# Provide both common alias names:
+# header lives at repo root
+target_include_directories(mustache_headers INTERFACE "${mustache_src_SOURCE_DIR}")
 add_library(kainjow::mustache ALIAS mustache_headers)
-add_library(mustache::mustache ALIAS mustache_headers)
+add_library(mustache::mustache  ALIAS mustache_headers)
 
 # ---- internal interface libs ----
 add_library(csvqr_core INTERFACE)
@@ -107,12 +107,16 @@ add_executable(csv_quick_report
   src/csv/csv_count.hpp
 )
 
+# ensure mustache headers are visible during compile
 target_link_libraries(csv_quick_report PRIVATE
   csvqr_core
   csvqr_report
   fmt::fmt
   CLI11::CLI11
-  mustache::mustache       # ensure mustache include path is present for this target
+  mustache::mustache
+)
+target_include_directories(csv_quick_report PRIVATE
+  "${mustache_src_SOURCE_DIR}/include"
 )
 
 # ---- warnings ----

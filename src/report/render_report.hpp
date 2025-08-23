@@ -1,5 +1,5 @@
 #pragma once
-#include <kainjow/mustache.hpp>
+#include <mustache.hpp>
 #include <fstream>
 #include <sstream>
 #include <string>
