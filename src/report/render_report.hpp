@@ -16,6 +16,8 @@ inline std::string slurp(const std::filesystem::path& p) {
     return oss.str();
 }
 
+// Renders report.html by embedding the three JSON blobs into Mustache context.
+// The template should reference them with triple braces: {{{run_json}}}, {{{profile_json}}}, {{{dag_json}}}
 inline void render_report(const std::filesystem::path& template_path,
                           const std::filesystem::path& profile_json,
                           const std::filesystem::path& run_json,
@@ -24,13 +26,14 @@ inline void render_report(const std::filesystem::path& template_path,
     const auto tmpl = slurp(template_path);
     kainjow::mustache::mustache m{tmpl};
 
-    // (For now we just inject the raw JSON blobs as strings under separate keys.)
     kainjow::mustache::data ctx;
+    // triple braces in template prevent HTML-escaping, so we pass raw JSON strings
     ctx.set("profile_json", slurp(profile_json));
-    ctx.set("run_json", slurp(run_json));
-    ctx.set("dag_json", slurp(dag_json));
+    ctx.set("run_json",     slurp(run_json));
+    ctx.set("dag_json",     slurp(dag_json));
 
-    auto rendered = m.render(ctx);
+    const auto rendered = m.render(ctx);
+
     std::ofstream out(out_html, std::ios::binary);
     if (!out) throw std::runtime_error("Failed to write: " + out_html.string());
     out << rendered;

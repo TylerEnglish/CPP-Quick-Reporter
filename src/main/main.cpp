@@ -90,11 +90,10 @@ int main(int argc, char** argv) try {
     emit_profile_json(profile_json.string(), input_path.string(), counts.rows, counts.columns, header);
     emit_dag_json(dag_json.string());
 
-    // Render HTML report (uses Mustache + embeds the three JSON blobs)
+    // Render HTML report by embedding the actual JSON blobs (what the template expects)
     try {
         csvqr::render_report(report_tmpl, profile_json, run_json, dag_json, report_html);
     } catch (const std::exception& re) {
-        // Don't fail the run if report rendering has a template path issue; just warn.
         fmt::print(stderr, "WARN: report render failed: {}\n", re.what());
     }
 
