@@ -1,11 +1,20 @@
+// src/util/json_escape.hpp
 #pragma once
 #include <string>
 #include <string_view>
 
-inline std::string json_escape(std::string_view s) {
+namespace csvqr {
+
+// Minimal JSON string escaper.
+// Escapes: backslash, quote, control chars (< 0x20), and common whitespace.
+inline std::string json_escape(std::string_view in) {
     std::string out;
-    out.reserve(s.size() + 8);
-    for (char c : s) {
+    out.reserve(in.size() + 16);
+    auto hex = [](unsigned v)->char {
+        return (v < 10) ? char('0' + v) : char('a' + (v - 10));
+    };
+
+    for (unsigned char c : in) {
         switch (c) {
             case '\"': out += "\\\""; break;
             case '\\': out += "\\\\"; break;
@@ -15,14 +24,17 @@ inline std::string json_escape(std::string_view s) {
             case '\r': out += "\\r";  break;
             case '\t': out += "\\t";  break;
             default:
-                if (static_cast<unsigned char>(c) < 0x20) {
-                    char buf[7];
-                    std::snprintf(buf, sizeof(buf), "\\u%04x", c);
-                    out += buf;
+                if (c < 0x20) {
+                    // \u00XX
+                    out += "\\u00";
+                    out += hex((c >> 4) & 0xF);
+                    out += hex(c & 0xF);
                 } else {
-                    out += c;
+                    out.push_back(static_cast<char>(c));
                 }
         }
     }
     return out;
+}
+
 }

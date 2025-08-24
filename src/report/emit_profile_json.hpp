@@ -1,62 +1,58 @@
+// src/report/emit_profile_json.hpp
 #pragma once
-#include <fmt/format.h>
-#include <cstdint>
-#include <fstream>
-#include <stdexcept>
 #include <string>
+#include <vector>
+#include <fstream>
+#include <cstdint>
+#include "../profile/profile.hpp"
+#include "../util/json_escape.hpp"
 
-// Minimal JSON string escaper for paths/short strings.
-inline std::string json_escape(std::string_view s) {
-    std::string out;
-    out.reserve(s.size() * 2);
-    for (char c : s) {
-        switch (c) {
-            case '\\': out += "\\\\"; break;
-            case '\"': out += "\\\""; break;
-            default:   out += c;      break;
-        }
-    }
-    return out;
-}
+namespace csvqr {
 
-// Writes profile.json (schema v1).
-// MVP: emit N synthetic columns (col1..colN) with non_null_count=rows (refine when profiling is wired).
+// Overload that accepts computed columns
 inline void emit_profile_json(const std::string& out_path,
                               const std::string& source_path,
                               std::uint64_t rows,
-                              std::uint32_t columns,
-                              bool header_present)
+                              bool header_present,
+                              const std::vector<ColumnSummary>& cols)
 {
-    std::ofstream f(out_path, std::ios::binary);
-    if (!f) throw std::runtime_error("Failed to open for write: " + out_path);
+    std::ofstream os(out_path, std::ios::binary);
+    if (!os) return;
 
-    const std::string escaped_path = json_escape(source_path);
-    const std::uint64_t non_null = rows;
+    os << "{\n";
+    os << "  \"version\":\"1\",\n";
+    os << "  \"dataset\":{";
+    os << "\"rows\":" << rows << ",";
+    os << "\"columns\":" << cols.size() << ",";
+    os << "\"header_present\":" << (header_present ? "true" : "false") << ",";
+    os << "\"source_path\":\"" << csvqr::json_escape(source_path) << "\"";
+    os << "},\n";
 
-    f << fmt::format(
-R"({{
-  "version":"1",
-  "dataset":{{"rows":{},"columns":{},"header_present":{},"source_path":"{}"}},
-  "columns":[)",
-        rows,
-        columns,
-        header_present ? "true" : "false",
-        escaped_path
-    );
-
-    if (columns == 0) {
-        // schema requires minItems=1
-        f << R"({"name":"_unknown","logical_type":"string","null_count":0,"non_null_count":0})";
-    } else {
-        for (std::uint32_t i = 0; i < columns; ++i) {
-            const std::string name = "col" + std::to_string(i+1);
-            f << fmt::format(
-                R"({{"name":"{}","logical_type":"string","null_count":0,"non_null_count":{}}})",
-                name, non_null
-            );
-            if (i + 1 < columns) f << ",";
-        }
+    os << "  \"columns\":[";
+    for (size_t i = 0; i < cols.size(); ++i) {
+        const auto& c = cols[i];
+        if (i) os << ",";
+        os << "{";
+        os << "\"name\":\""          << csvqr::json_escape(c.name)         << "\",";
+        os << "\"logical_type\":\""  << csvqr::json_escape(c.logical_type) << "\",";
+        os << "\"null_count\":"      << c.null_count                        << ",";
+        os << "\"non_null_count\":"  << c.non_null_count;
+        os << "}";
     }
+    os << "]\n";
+    os << "}\n";
+}
 
-    f << "]\n}\n";
+// Convenience: compute + emit from file
+inline void emit_profile_json_scan_file(const std::string& out_path,
+                                        const std::string& source_path,
+                                        std::uint64_t /*rows_hint*/,
+                                        char delim,
+                                        char quote,
+                                        bool header_present)
+{
+    auto pr = csvqr::profile_csv_file(source_path, delim, quote, header_present);
+    emit_profile_json(out_path, source_path, pr.rows, header_present, pr.columns);
+}
+
 }
