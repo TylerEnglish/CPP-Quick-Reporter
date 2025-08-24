@@ -1,11 +1,12 @@
 #pragma once
-#include <fmt/format.h>
 #include <fstream>
 #include <string>
 
 // Minimal DAG that matches the planned stages.
 inline void emit_dag_json(const std::string& out_path) {
     std::ofstream f(out_path, std::ios::binary);
+    if (!f) return;
+
     f << R"({
   "version":"1",
   "nodes":[

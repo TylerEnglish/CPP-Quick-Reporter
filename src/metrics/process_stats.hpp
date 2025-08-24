@@ -1,24 +1,34 @@
 #pragma once
 #include <cstdint>
-#include <chrono>
 
-namespace csvqr {
+#if defined(_WIN32)
+  #include <windows.h>
+  #include <psapi.h>
+  inline double process_rss_mb() {
+      PROCESS_MEMORY_COUNTERS_EX pmc{};
+      if (GetProcessMemoryInfo(GetCurrentProcess(),
+                               reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&pmc),
+                               sizeof(pmc))) {
+          return static_cast<double>(pmc.WorkingSetSize) / (1024.0 * 1024.0);
+      }
+      return 0.0;
+  }
+#else
+  #include <unistd.h>
+  #include <fstream>
+  inline double process_rss_mb() {
+      long rss_pages = 0L;
+      std::ifstream f("/proc/self/statm");
+      long ignore = 0L;
+      if (f) {
+          f >> ignore >> rss_pages;
+      }
+      const long page = sysconf(_SC_PAGESIZE);
+      return (rss_pages > 0 && page > 0)
+          ? (static_cast<double>(rss_pages) * static_cast<double>(page)) / (1024.0 * 1024.0)
+          : 0.0;
+  }
+#endif
 
-struct proc_sample {
-    std::int64_t ts_ms{0};
-    double rss_mb{0.0};
-    double cpu_pct{0.0};
-    std::uint64_t bytes_in{0};
-    std::uint64_t bytes_out{0};
-};
-
-// Cheap, portable “do nothing” sampler; wire up real Windows APIs later.
-inline proc_sample sample_process_now() {
-    auto now = std::chrono::steady_clock::now().time_since_epoch();
-    auto ms  = std::chrono::duration_cast<std::chrono::milliseconds>(now).count();
-    proc_sample s;
-    s.ts_ms = static_cast<std::int64_t>(ms);
-    return s;
-}
-
-}
+// Placeholder for future CPU utilization if you want it:
+inline double process_cpu_pct() { return 0.0; }

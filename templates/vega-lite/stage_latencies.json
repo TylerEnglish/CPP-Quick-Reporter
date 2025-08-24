@@ -1,0 +1,22 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "width": "container",
+  "height": 180,
+  "data": { "values": [] },
+  "transform": [
+    {
+      "calculate": "isValid(datum.p95_ms) ? toNumber(datum.p95_ms) : 0",
+      "as": "v"
+    }
+  ],
+  "mark": "bar",
+  "encoding": {
+    "x": { "field": "name", "type": "nominal", "sort": null, "title": null },
+    "y": { "field": "v", "type": "quantitative", "title": "p95 (ms)" },
+    "tooltip": [
+      { "field": "name", "title": "stage" },
+      { "field": "v", "title": "p95 (ms)", "format": ".3f" },
+      { "field": "calls", "title": "calls" }
+    ]
+  }
+}

@@ -6,7 +6,6 @@
 #include <string>
 
 // Minimal JSON string escaper for paths/short strings.
-// Escapes backslash and double quote.
 inline std::string json_escape(std::string_view s) {
     std::string out;
     out.reserve(s.size() * 2);
@@ -20,7 +19,8 @@ inline std::string json_escape(std::string_view s) {
     return out;
 }
 
-// Writes profile.json (schema v1) with valid fields: rows, columns, header, source_path.
+// Writes profile.json (schema v1).
+// MVP: emit N synthetic columns (col1..colN) with non_null_count=rows (refine when profiling is wired).
 inline void emit_profile_json(const std::string& out_path,
                               const std::string& source_path,
                               std::uint64_t rows,
@@ -31,19 +31,32 @@ inline void emit_profile_json(const std::string& out_path,
     if (!f) throw std::runtime_error("Failed to open for write: " + out_path);
 
     const std::string escaped_path = json_escape(source_path);
+    const std::uint64_t non_null = rows;
 
-    // Minimal "columns" array to satisfy schema; you can replace with real columns later.
     f << fmt::format(
-        R"({{
+R"({{
   "version":"1",
   "dataset":{{"rows":{},"columns":{},"header_present":{},"source_path":"{}"}},
-  "columns":[
-    {{"name":"_unknown","logical_type":"string","null_count":0,"non_null_count":0}}
-  ]
-}})",
+  "columns":[)",
         rows,
         columns,
         header_present ? "true" : "false",
         escaped_path
     );
+
+    if (columns == 0) {
+        // schema requires minItems=1
+        f << R"({"name":"_unknown","logical_type":"string","null_count":0,"non_null_count":0})";
+    } else {
+        for (std::uint32_t i = 0; i < columns; ++i) {
+            const std::string name = "col" + std::to_string(i+1);
+            f << fmt::format(
+                R"({{"name":"{}","logical_type":"string","null_count":0,"non_null_count":{}}})",
+                name, non_null
+            );
+            if (i + 1 < columns) f << ",";
+        }
+    }
+
+    f << "]\n}\n";
 }

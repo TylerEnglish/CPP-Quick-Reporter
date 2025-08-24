@@ -28,6 +28,7 @@ Thumbs.db
 /dist/
 /tmp/
 /logs/
+templates/assets/vendor/*
 
 # Binaries & objects
 *.o

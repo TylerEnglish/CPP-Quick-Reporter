@@ -119,6 +119,51 @@ target_include_directories(csv_quick_report PRIVATE
   "${mustache_src_SOURCE_DIR}/include"
 )
 
+# ---------- Offline chart assets (download + stage) ----------
+option(CSVQR_FETCH_VEGA "Download Vega/Vega-Lite/Embed bundles at configure time" ON)
+
+set(CSVQR_ASSETS_SRC_DIR   ${CMAKE_BINARY_DIR}/assets)
+set(CSVQR_VENDOR_DIR       ${CSVQR_ASSETS_SRC_DIR}/vendor)
+
+# Pinned versions (compatible majors)
+set(CSVQR_VEGA_VER        5.25.0)
+set(CSVQR_VEGA_LITE_VER   5.17.0)
+set(CSVQR_VEGA_EMBED_VER  6.24.0)
+
+if(CSVQR_FETCH_VEGA)
+  file(MAKE_DIRECTORY ${CSVQR_VENDOR_DIR})
+
+  set(_vega_url   https://cdn.jsdelivr.net/npm/vega@${CSVQR_VEGA_VER}/build/vega.min.js)
+  set(_vl_url     https://cdn.jsdelivr.net/npm/vega-lite@${CSVQR_VEGA_LITE_VER}/build/vega-lite.min.js)
+  set(_embed_url  https://cdn.jsdelivr.net/npm/vega-embed@${CSVQR_VEGA_EMBED_VER}/build/vega-embed.min.js)
+
+  set(_vega_out   ${CSVQR_VENDOR_DIR}/vega.min.js)
+  set(_vl_out     ${CSVQR_VENDOR_DIR}/vega-lite.min.js)
+  set(_embed_out  ${CSVQR_VENDOR_DIR}/vega-embed.min.js)
+
+  if(NOT EXISTS ${_vega_out})
+    message(STATUS "Downloading Vega → ${_vega_out}")
+    file(DOWNLOAD ${_vega_url} ${_vega_out} SHOW_PROGRESS TLS_VERIFY ON)
+  endif()
+  if(NOT EXISTS ${_vl_out})
+    message(STATUS "Downloading Vega-Lite → ${_vl_out}")
+    file(DOWNLOAD ${_vl_url} ${_vl_out} SHOW_PROGRESS TLS_VERIFY ON)
+  endif()
+  if(NOT EXISTS ${_embed_out})
+    message(STATUS "Downloading vega-embed → ${_embed_out}")
+    file(DOWNLOAD ${_embed_url} ${_embed_out} SHOW_PROGRESS TLS_VERIFY ON)
+  endif()
+endif()
+
+# Stage assets to build tree (convenient for dev runs)
+add_custom_target(csvqr_assets ALL
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+          ${CSVQR_ASSETS_SRC_DIR}
+          ${CMAKE_BINARY_DIR}/assets
+  COMMENT "Staging report assets to ${CMAKE_BINARY_DIR}/assets"
+)
+add_dependencies(csv_quick_report csvqr_assets)
+
 # ---- warnings ----
 if(MSVC)
   add_compile_options(
@@ -176,6 +221,11 @@ if(CSVQR_BUILD_BENCH)
     fmt::fmt
   )
 endif()
+
+# ---- install (templates & sample config) ----
+include(GNUInstallDirs)
+install(DIRECTORY templates/ DESTINATION ${CMAKE_INSTALL_DATADIR}/csvqr/templates)
+install(FILES config/config.toml DESTINATION ${CMAKE_INSTALL_DATADIR}/csvqr/config)
 
 # ---- install (templates & sample config) ----
 include(GNUInstallDirs)
