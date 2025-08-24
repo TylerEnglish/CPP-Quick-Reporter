@@ -8,20 +8,18 @@
 struct RunStage {
     std::string name;
     std::uint64_t calls = 0;
-    double p50_ms = 0.0;  // optional
-    double p95_ms = 0.0;  // optional
-    // (bytes/rows in/out omitted for now)
+    double p50_ms = 0.0;
+    double p95_ms = 0.0;
 };
 
 struct RunSample {
     std::uint64_t ts_ms = 0;
     std::uint64_t bytes_in = 0;
-    std::uint64_t bytes_out = 0;
+    std::uint64_t bytes_out = 0; // optional/reused for rows_in in your code
     double rss_mb = 0.0;
-    double cpu_pct = 0.0;
+    double cpu_pct = 0.0;        // ALWAYS serialized
 };
 
-// Writes run.json (schema v1).
 inline void emit_run_json(const std::string& out_path,
                           const std::string& started_iso,
                           const std::string& ended_iso,
@@ -41,7 +39,6 @@ inline void emit_run_json(const std::string& out_path,
     std::ofstream f(out_path, std::ios::binary);
     if (!f) return;
 
-    // header
     f << "{\n";
     f << R"(  "version":"1",)"
       << "\n  " << fmt::format(R"("started_at":"{}",)", started_iso)
@@ -72,19 +69,18 @@ inline void emit_run_json(const std::string& out_path,
     }
     f << "  ],\n";
 
-    // samples
+    // samples — ALWAYS include cpu_pct (and bytes_out when > 0)
     f << "  \"samples\":[\n";
     for (size_t i = 0; i < samples.size(); ++i) {
         const auto& s = samples[i];
         f << "    {"
-          << fmt::format(R"("ts_ms":{},"bytes_in":{},"rss_mb":{})", s.ts_ms, s.bytes_in, s.rss_mb);
+          << fmt::format(R"("ts_ms":{},"bytes_in":{},"rss_mb":{},"cpu_pct":{})",
+                         s.ts_ms, s.bytes_in, s.rss_mb, s.cpu_pct);
         if (s.bytes_out > 0) f << fmt::format(R"(,"bytes_out":{})", s.bytes_out);
-        if (s.cpu_pct > 0.0) f << fmt::format(R"(,"cpu_pct":{})", s.cpu_pct);
         f << "}";
         if (i + 1 < samples.size()) f << ",";
         f << "\n";
     }
     f << "  ]\n";
-
     f << "}\n";
 }

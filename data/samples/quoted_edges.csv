@@ -1,0 +1,7 @@
+id,text,notes
+1,"He said ""hi""","Field with ""quotes"" inside"
+2,"value,with,commas","multiple, commas, here"
+3,"Line with
+embedded newline","yep, that's a newline"
+4,"simple","normal field"
+5,"""quoted at start""","ok"

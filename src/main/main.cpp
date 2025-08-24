@@ -309,7 +309,8 @@ int main(int argc, char** argv) try {
         if (!samples.empty() && samples.back().bytes_in < file_bytes) {
             const std::uint64_t ts_ms = static_cast<std::uint64_t>(wt_scan_clock.ms());
             const double rss_now = process_rss_mb();
-            samples.push_back(RunSample{ ts_ms, file_bytes, rows_in, rss_now, 0.0 });
+            const double cpu_pct_final = cpu.sample();  // <— get a reading
+            samples.push_back(RunSample{ ts_ms, file_bytes, rows_in, rss_now, cpu_pct_final });
         }
     }
 
