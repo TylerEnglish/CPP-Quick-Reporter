@@ -40,6 +40,7 @@ CPP-Quick-Reporter/
 │  │  └─ timers.hpp 
 │  ├─ profile/
 │  │  ├─ profile.hpp
+│  │  ├─ profiler.hpp
 │  │  └─ histogram.hpp  
 │  ├─ report/
 │  │  ├─ emit_run_json.hpp

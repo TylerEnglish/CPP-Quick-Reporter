@@ -1,16 +1,13 @@
 {
   "version": "1",
   "nodes": [
-    { "id": "n1", "label": "read_chunks",       "type": "io",      "duration_ms": 100.0, "rows_in": null, "rows_out": null, "bytes_in": 0,    "bytes_out": 2048 },
-    { "id": "n2", "label": "tokenize_csv",      "type": "parse",   "duration_ms": 200.0, "rows_in": null, "rows_out": 100,  "bytes_in": 2048, "bytes_out": 2048 },
-    { "id": "n3", "label": "type_infer",        "type": "analyze", "duration_ms": 50.0,  "rows_in": 100,  "rows_out": 100,  "bytes_in": null, "bytes_out": null },
-    { "id": "n4", "label": "profile_columns",   "type": "profile", "duration_ms": 300.0, "rows_in": 100,  "rows_out": 100,  "bytes_in": null, "bytes_out": null },
-    { "id": "n5", "label": "emit_report",       "type": "render",  "duration_ms": 20.0,  "rows_in": null, "rows_out": null, "bytes_in": null, "bytes_out": null }
+    { "label": "read_chunks" },
+    { "label": "tokenize_csv" },
+    { "label": "type_infer" },
+    { "label": "profile_columns" },
+    { "label": "emit_report" }
   ],
   "edges": [
-    { "from": "n1", "to": "n2" },
-    { "from": "n2", "to": "n3" },
-    { "from": "n3", "to": "n4" },
-    { "from": "n4", "to": "n5" }
+    { "from": "n1", "to": "n2" }
   ]
 }

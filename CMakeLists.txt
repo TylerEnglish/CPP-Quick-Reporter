@@ -164,6 +164,48 @@ add_custom_target(csvqr_assets ALL
 )
 add_dependencies(csv_quick_report csvqr_assets)
 
+# ---- Validation / Golden tests (optional) ----
+option(CSVQR_ENABLE_VALIDATOR "Run JSON schema + truth snippet validation" ON)
+
+if (CSVQR_ENABLE_VALIDATOR)
+  # Find Python, but don't fail the whole configure if it's missing
+  find_package(Python3 COMPONENTS Interpreter QUIET)
+
+  if (Python3_Interpreter_FOUND)
+    message(STATUS "Python found: ${Python3_EXECUTABLE}")
+
+    # Generate one sample artifact with a stable project-id
+    add_custom_target(gen_sample_artifacts ALL
+      COMMAND $<TARGET_FILE:csv_quick_report>
+              --input ${CMAKE_SOURCE_DIR}/data/samples/simple.csv
+              --output-root ${CMAKE_SOURCE_DIR}/artifacts
+              --project-id sample_simple
+              --chunk-bytes 1024
+              --has-header true
+      DEPENDS csv_quick_report
+      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+      COMMENT "Generating artifacts for sample_simple"
+    )
+
+    enable_testing()
+
+    add_test(NAME validate_artifacts
+      COMMAND ${Python3_EXECUTABLE}
+              ${CMAKE_SOURCE_DIR}/scripts/validate_artifacts.py
+              --artifacts-dir ${CMAKE_SOURCE_DIR}/artifacts
+              --schemas-dir   ${CMAKE_SOURCE_DIR}/schemas
+              --projects      sample_simple
+              --truth-dir     ${CMAKE_SOURCE_DIR}/tests/fixtures
+    )
+    add_dependencies(validate_artifacts gen_sample_artifacts)
+
+  else()
+    message(WARNING
+      "Python3 interpreter not found; validator tests are disabled. "
+      "Set -DPython3_EXECUTABLE=C:/Path/To/python.exe to enable.")
+  endif()
+endif()
+
 # ---- warnings ----
 if(MSVC)
   add_compile_options(
@@ -222,6 +264,8 @@ if(CSVQR_BUILD_BENCH)
   )
 endif()
 
+add_executable(gen_synth_csv scripts/gen_synth_csv.cpp)
+
 # ---- install (templates & sample config) ----
 include(GNUInstallDirs)
 install(DIRECTORY templates/ DESTINATION ${CMAKE_INSTALL_DATADIR}/csvqr/templates)
@@ -231,3 +275,4 @@ install(FILES config/config.toml DESTINATION ${CMAKE_INSTALL_DATADIR}/csvqr/conf
 include(GNUInstallDirs)
 install(DIRECTORY templates/ DESTINATION ${CMAKE_INSTALL_DATADIR}/csvqr/templates)
 install(FILES config/config.toml DESTINATION ${CMAKE_INSTALL_DATADIR}/csvqr/config)
+
