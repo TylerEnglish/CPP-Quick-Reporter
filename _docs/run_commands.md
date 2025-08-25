@@ -1,15 +1,19 @@
 
 ## start build:
 ```bash
-Remove-Item -Recurse -Force build\debug
-"C:\Program Files\CMake\bin\cmake.exe" -S . -B build\debug -G "Visual Studio 17 2022"
-"C:\Program Files\CMake\bin\cmake.exe" --build build\debug --config Debug
-"C:\Program Files\CMake\bin\ctest.exe" --test-dir build\debug -C Debug --output-on-failure
+$CMake = "C:\Program Files\CMake\bin\cmake.exe"
+$CTest = "C:\Program Files\CMake\bin\ctest.exe"
+$Bld   = "build\debug"
+
+Remove-Item -Recurse -Force $Bld -ErrorAction SilentlyContinue
+& $CMake -S . -B $Bld -G "Visual Studio 17 2022" -A x64
+& $CMake --build $Bld --config Debug -- /m
+& $CTest --test-dir $Bld -C Debug --output-on-failure
 ```
 
 ## for bench_pipeline:
 ```bash
-"C:\Program Files\CMake\bin\cmake.exe" --build build\debug --config Release --target csvqr_bench_pipeline
+& $CMake --build build\debug --config Release --target csvqr_bench_pipeline
 ```
 
 ### run bench_pipeline:
