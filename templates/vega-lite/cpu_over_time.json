@@ -1,0 +1,19 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "width": "container",
+  "height": 160,
+  "data": { "values": [] },
+  "transform": [
+    { "calculate": "toNumber(datum.ts_ms)", "as": "ts" },
+    { "calculate": "toNumber(datum.cpu_pct)", "as": "cpu" }
+  ],
+  "mark": "line",
+  "encoding": {
+    "x": { "field": "ts", "type": "quantitative", "title": "time (ms)" },
+    "y": { "field": "cpu", "type": "quantitative", "title": "CPU (%)" },
+    "tooltip": [
+      { "field": "ts", "title": "ms" },
+      { "field": "cpu", "title": "CPU (%)", "format": ".1f" }
+    ]
+  }
+}

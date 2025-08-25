@@ -1,0 +1,39 @@
+name: ci
+on: [push, pull_request]
+
+jobs:
+  build-and-validate:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install validator deps
+        run: pip install jsonschema
+
+      - name: Configure (Debug)
+        run: |
+          cmake -S . -B build/debug -DCMAKE_BUILD_TYPE=Debug
+      - name: Build
+        run: cmake --build build/debug --config Debug
+
+      - name: Generate artifacts (samples)
+        shell: pwsh
+        run: |
+          $exe = Resolve-Path .\build\debug\Debug\csv_quick_report.exe
+          & $exe --input .\data\samples\simple.csv        --output-root .\artifacts --project-id sample_simple  --chunk-bytes 1024 --has-header true
+          & $exe --input .\data\samples\nulls.csv         --output-root .\artifacts --project-id sample_nulls   --chunk-bytes 1024 --has-header true
+          & $exe --input .\data\samples\quoted_edges.csv  --output-root .\artifacts --project-id sample_quoted  --chunk-bytes 1024 --has-header true
+          & $exe --input .\data\samples\bigints.csv       --output-root .\artifacts --project-id sample_bigints --chunk-bytes 1024 --has-header true
+
+      - name: Validate artifacts
+        run: |
+          python scripts/validate_artifacts.py ^
+            --artifacts-dir artifacts ^
+            --schemas-dir schemas ^
+            --projects sample_simple sample_nulls sample_quoted sample_bigints ^
+            --truth-dir tests/fixtures

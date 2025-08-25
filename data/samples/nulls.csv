@@ -1,0 +1,9 @@
+id,int_col,float_col,bool_col,date_col,str_col
+1,10,1.5,true,2024-01-01,alpha
+2,,2.5,false,2024-01-02,NA
+3,30,,YES,2024-01-03,
+4,NA,4.0,NO,,bravo
+5,50,NaN,1,2024-02-01,charlie
+6,0,0.0,0,2024-02-02,NULL
+7,, ,true,2024-02-03,""
+8,70,8.25,False,2024-02-04,delta

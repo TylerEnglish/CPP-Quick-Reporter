@@ -1,0 +1,13 @@
+{
+  "version": "1",
+  "nodes": [
+    { "label": "read_chunks" },
+    { "label": "tokenize_csv" },
+    { "label": "type_infer" },
+    { "label": "profile_columns" },
+    { "label": "emit_report" }
+  ],
+  "edges": [
+    { "from": "n1", "to": "n2" }
+  ]
+}

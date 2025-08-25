@@ -1,0 +1,8 @@
+{
+  "version": "1",
+  "stages": [
+    { "name": "scan_chunks" },
+    { "name": "count_rows_cols" }
+  ],
+  "samples": [ {} ]
+}

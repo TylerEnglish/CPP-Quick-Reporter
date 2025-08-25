@@ -1,0 +1,19 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "width": "container",
+  "height": 160,
+  "data": { "values": [] },
+  "transform": [
+    { "calculate": "toNumber(datum.ts_ms)", "as": "ts" },
+    { "calculate": "toNumber(datum.rss_mb)", "as": "rss" }
+  ],
+  "mark": "line",
+  "encoding": {
+    "x": { "field": "ts", "type": "quantitative", "title": "time (ms)" },
+    "y": { "field": "rss", "type": "quantitative", "title": "RSS (MB)" },
+    "tooltip": [
+      { "field": "ts", "title": "ms" },
+      { "field": "rss", "title": "RSS (MB)", "format": ".2f" }
+    ]
+  }
+}

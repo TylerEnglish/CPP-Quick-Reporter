@@ -1,0 +1,7 @@
+{
+  "version": "1",
+  "dataset": { "header_present": true },
+  "columns": [
+    { "name": "id" }
+  ]
+}

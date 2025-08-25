@@ -1,0 +1,21 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "width": "container",
+  "height": 180,
+  "data": { "values": [] },
+  "transform": [
+    { "calculate": "toNumber(datum.non_null_count) + toNumber(datum.null_count)", "as": "tot" },
+    { "calculate": "datum.tot > 0 ? toNumber(datum.null_count)/datum.tot : 0", "as": "ratio" }
+  ],
+  "mark": "bar",
+  "encoding": {
+    "x": { "field": "name", "type": "nominal", "sort": null, "title": null },
+    "y": { "field": "ratio", "type": "quantitative", "title": "null ratio", "axis": { "format": ".0%" } },
+    "tooltip": [
+      { "field": "name", "title": "column" },
+      { "field": "ratio", "title": "null ratio", "format": ".1%" },
+      { "field": "null_count", "title": "nulls" },
+      { "field": "non_null_count", "title": "non-nulls" }
+    ]
+  }
+}

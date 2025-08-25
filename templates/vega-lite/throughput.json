@@ -1,0 +1,19 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "width": "container",
+  "height": 160,
+  "data": { "values": [] },
+  "transform": [
+    { "calculate": "toNumber(datum.ts_ms)", "as": "ts" },
+    { "calculate": "toNumber(datum.bytes_in) / 1048576", "as": "mb" }
+  ],
+  "mark": { "type": "line", "interpolate": "monotone" },
+  "encoding": {
+    "x": { "field": "ts", "type": "quantitative", "title": "time (ms)" },
+    "y": { "field": "mb", "type": "quantitative", "title": "MB in" },
+    "tooltip": [
+      { "field": "ts", "title": "ms" },
+      { "field": "mb", "title": "MB", "format": ".2f" }
+    ]
+  }
+}

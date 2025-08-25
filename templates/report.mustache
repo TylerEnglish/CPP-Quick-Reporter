@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <!-- Some linters want the http-equiv too when served via HTTP -->
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>CSV → Quick Reporter</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="assets/app.css" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>CSV → Quick Reporter</h1>
+        <div class="meta" id="meta">Loading…</div>
+      </div>
+      <div class="chip" id="buildChip">Spec v1</div>
+    </header>
+
+    <!-- Diagnostics line (filled by app.js if anything goes wrong) -->
+    <div id="diag" class="diag muted small" aria-live="polite"></div>
+
+    <!-- KPI cards -->
+    <section class="cards">
+      <div class="card">
+        <h4>Rows</h4><div class="val" id="kpi-rows">—</div>
+        <div class="small" id="kpi-cols">—</div>
+      </div>
+      <div class="card">
+        <h4>Errors</h4><div class="val" id="kpi-errors">—</div>
+        <div class="small">Failures during run</div>
+      </div>
+      <div class="card">
+        <h4>Wall Time</h4><div class="val"><span id="kpi-wall">—</span> <span class="small">ms</span></div>
+        <div class="small" id="kpi-startend">—</div>
+      </div>
+      <div class="card">
+        <h4>Input Throughput</h4><div class="val"><span id="kpi-mbps">—</span> <span class="small">MB/s</span></div>
+        <div class="small"><span id="kpi-bytes">—</span></div>
+      </div>
+      <div class="card">
+        <h4>Peak RSS</h4><div class="val"><span id="kpi-rss">—</span> <span class="small">MB</span></div>
+        <div class="small">Process memory peak</div>
+      </div>
+      <div class="card">
+        <h4>Header</h4><div class="val" id="kpi-header">—</div>
+        <div class="small">Dataset has header row</div>
+      </div>
+    </section>
+
+    <!-- Charts -->
+    <section class="section">
+      <h2>Throughput Timeline</h2>
+      <div class="panel chart" id="chart-throughput">Preparing…</div>
+    </section>
+
+    <section class="section grid-2">
+      <div class="panel">
+        <h2>Per-Stage Activity</h2>
+        <div class="chart" id="chart-stage">Preparing…</div>
+      </div>
+      <div class="panel">
+        <h2>Null Ratio by Column</h2>
+        <div class="chart" id="chart-null">Preparing…</div>
+      </div>
+    </section>
+
+    <section class="section grid-2">
+      <div class="panel">
+        <h2>Memory Over Time</h2>
+        <div class="chart" id="chart-mem">Preparing…</div>
+      </div>
+      <div class="panel">
+        <h2>CPU Utilization</h2>
+        <div class="chart" id="chart-cpu">Preparing…</div>
+      </div>
+    </section>
+
+    <!-- Stages table + DAG summary -->
+    <section class="section grid-2">
+      <div class="panel">
+        <h2>Stages</h2>
+        <table class="table" id="stages-table">
+          <thead><tr><th>Name</th><th>Calls</th><th>P50 (ms)</th><th>P95 (ms)</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="panel">
+        <h2>DAG Overview</h2>
+        <div id="dag-overview" class="small">—</div>
+        <div class="mt-8">
+          <ul id="dag-edges" class="small ul-compact"></ul>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      Built by CSV → Quick Reporter • Spec v1 • Charts powered by Vega-Lite.
+    </footer>
+  </div>
+
+  <!-- Embedded data (Mustache triple braces). Read by app.js -->
+  <script id="run_json" type="application/json">{{{run_json}}}</script>
+  <script id="profile_json" type="application/json">{{{profile_json}}}</script>
+  <script id="dag_json" type="application/json">{{{dag_json}}}</script>
+
+  <!-- Vendor libs (no CDN). Load BEFORE app.js -->
+  <script src="assets/vendor/vega.min.js"></script>
+  <script src="assets/vendor/vega-lite.min.js"></script>
+  <script src="assets/vendor/vega-embed.min.js"></script>
+
+  <!-- App logic (no defer, so it runs after the vendors) -->
+  <script src="assets/app.js"></script>
+</body>
+</html>
