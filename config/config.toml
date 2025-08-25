@@ -5,7 +5,7 @@ quote = "\""
 escape = "\\"
 has_header = true
 assume_rfc4180 = true
-max_line_length = 1048576     # guardrail
+max_line_length = 1048576
 
 [sampling]
 sample_frac = 0.10

@@ -27,10 +27,15 @@
         "required": ["name", "logical_type", "null_count", "non_null_count"],
         "properties": {
           "name": { "type": "string" },
+
           "logical_type": {
             "type": "string",
-            "enum": ["int64", "float64", "bool", "date", "datetime", "string"]
+            "enum": [
+              "int64", "float64", "bool", "date", "datetime", "string",
+              "int",   "float",   "boolean"
+            ]
           },
+
           "null_count": { "type": "integer", "minimum": 0 },
           "non_null_count": { "type": "integer", "minimum": 0 },
           "min": { "type": ["number", "string", "boolean", "null"] },

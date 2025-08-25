@@ -5,26 +5,24 @@ CPP-Quick-Reporter/
 │     └─ ci.yml 
 ├─ CMakeLists.txt
 ├─ CMakePresents.json
+├─ .gitignore
+├─ .dockerignore
+├─ docker-compose.yml
 ├─ README.MD
-
 ├─ config/
 │  └─ config.toml
 ├─ data/
-│  └─ large/  # empty
-
+│  └─ large/ 
 │  └─ samples/
-│    ├─ bigints.csv     # empty
-│    ├─ nulls.csv        # empty
-│    ├─ quoted_edges.csv     # empty
-
+│    ├─ bigints.csv 
+│    ├─ nulls.csv
+│    ├─ quoted_edges.csv
 │    └─ simple.csv 
 ├─ schemas/ 
 │  ├─ dag.schema.json
 │  ├─ profile.schema.json
 │  └─ run.schema.json
-├─ docker/ 
-│  ├─ Dockerfile     #basically empty
-│  └─ entrypoint.sh  #empty
+├─ docker/
 ├─ src/ 
 │  ├─ main/main.cpp
 │  ├─ cli/cli_options.hpp
@@ -66,8 +64,6 @@ CPP-Quick-Reporter/
 │     ├─ dag_truth.json 
 │     ├─ profile_truth.json 
 │     └─ run_truth.json
-│  └─ property/ 
-│     └─ test_csv_edges.cpp 
 │  └─ unit/
 │     ├─ test_tokenizer.cpp
 │     ├─ test_infer.cpp
@@ -76,7 +72,7 @@ CPP-Quick-Reporter/
 ├─ bench/
 │  ├─ bench_tokenizer.cpp
 │  └─ bench_pipeline.cpp
-├─ artifacts/             ← outputs here (runXXX dirs)
+├─ artifacts/
 └─ scripts/
 
 

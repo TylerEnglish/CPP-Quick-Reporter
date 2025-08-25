@@ -155,41 +155,66 @@ if(CSVQR_FETCH_VEGA)
   endif()
 endif()
 
-# Stage assets to build tree (convenient for dev runs)
+# Stage assets to build tree
 add_custom_target(csvqr_assets ALL
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/assets
+  # vendor bundle (already under ${CSVQR_ASSETS_SRC_DIR})
   COMMAND ${CMAKE_COMMAND} -E copy_directory
           ${CSVQR_ASSETS_SRC_DIR}
           ${CMAKE_BINARY_DIR}/assets
+  # app.js / app.css from the repo
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+          ${CMAKE_SOURCE_DIR}/templates/assets
+          ${CMAKE_BINARY_DIR}/assets
   COMMENT "Staging report assets to ${CMAKE_BINARY_DIR}/assets"
 )
-add_dependencies(csv_quick_report csvqr_assets)
+
+# Stage HTML templates (report.mustache) into build tree
+add_custom_target(csvqr_templates ALL
+  COMMAND ${CMAKE_COMMAND} -E copy_directory
+          ${CMAKE_SOURCE_DIR}/templates
+          ${CMAKE_BINARY_DIR}/templates
+  COMMENT "Staging HTML templates to ${CMAKE_BINARY_DIR}/templates"
+)
+
+# Ensure the exe builds only after assets/templates are staged
+add_dependencies(csv_quick_report csvqr_assets csvqr_templates)
 
 # ---- Validation / Golden tests (optional) ----
 option(CSVQR_ENABLE_VALIDATOR "Run JSON schema + truth snippet validation" ON)
 
 if (CSVQR_ENABLE_VALIDATOR)
-  # Find Python, but don't fail the whole configure if it's missing
   find_package(Python3 COMPONENTS Interpreter QUIET)
-
   if (Python3_Interpreter_FOUND)
     message(STATUS "Python found: ${Python3_EXECUTABLE}")
 
-    # Generate one sample artifact with a stable project-id
     add_custom_target(gen_sample_artifacts ALL
-      COMMAND $<TARGET_FILE:csv_quick_report>
+      COMMAND ${CMAKE_COMMAND} -E env
+              CSVQR_ASSETS_DIR=${CMAKE_BINARY_DIR}/assets
+              $<TARGET_FILE:csv_quick_report>
               --input ${CMAKE_SOURCE_DIR}/data/samples/simple.csv
               --output-root ${CMAKE_SOURCE_DIR}/artifacts
               --project-id sample_simple
               --chunk-bytes 1024
               --has-header true
-      DEPENDS csv_quick_report
+      DEPENDS csv_quick_report csvqr_assets csvqr_templates
       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
       COMMENT "Generating artifacts for sample_simple"
     )
 
     enable_testing()
+    add_custom_target(validate_artifacts ALL
+      COMMAND ${Python3_EXECUTABLE}
+              ${CMAKE_SOURCE_DIR}/scripts/validate_artifacts.py
+              --artifacts-dir ${CMAKE_SOURCE_DIR}/artifacts
+              --schemas-dir   ${CMAKE_SOURCE_DIR}/schemas
+              --projects      sample_simple
+              --truth-dir     ${CMAKE_SOURCE_DIR}/tests/fixtures
+      DEPENDS gen_sample_artifacts
+      COMMENT "Validating generated artifacts against schemas"
+    )
 
-    add_test(NAME validate_artifacts
+    add_test(NAME validate_artifacts_test
       COMMAND ${Python3_EXECUTABLE}
               ${CMAKE_SOURCE_DIR}/scripts/validate_artifacts.py
               --artifacts-dir ${CMAKE_SOURCE_DIR}/artifacts
@@ -197,12 +222,10 @@ if (CSVQR_ENABLE_VALIDATOR)
               --projects      sample_simple
               --truth-dir     ${CMAKE_SOURCE_DIR}/tests/fixtures
     )
-    add_dependencies(validate_artifacts gen_sample_artifacts)
 
   else()
-    message(WARNING
-      "Python3 interpreter not found; validator tests are disabled. "
-      "Set -DPython3_EXECUTABLE=C:/Path/To/python.exe to enable.")
+    message(WARNING "Python3 interpreter not found; validator tests are disabled. "
+                    "Set -DPython3_EXECUTABLE=C:/Path/To/python.exe to enable.")
   endif()
 endif()
 
@@ -253,15 +276,24 @@ if(CSVQR_BUILD_BENCH)
   set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
   set(BENCHMARK_ENABLE_GTEST_TESTS OFF CACHE BOOL "" FORCE)
   fetch_pkg(benchmark https://github.com/google/benchmark.git ${V_GBENCH})
-  add_executable(csvqr_bench
-    bench/bench_tokenizer.cpp
-    bench/bench_pipeline.cpp
-  )
-  target_link_libraries(csvqr_bench PRIVATE
-    csvqr_core
+
+  # bench: tokenizer
+  add_executable(csvqr_bench_tokenizer bench/bench_tokenizer.cpp)
+  target_include_directories(csvqr_bench_tokenizer PRIVATE ${CMAKE_SOURCE_DIR}/src)
+  target_link_libraries(csvqr_bench_tokenizer PRIVATE
     benchmark::benchmark
     fmt::fmt
   )
+  target_compile_definitions(csvqr_bench_tokenizer PRIVATE BENCHMARK_STATIC_DEFINE)
+
+  # bench: pipeline
+  add_executable(csvqr_bench_pipeline bench/bench_pipeline.cpp)
+  target_include_directories(csvqr_bench_pipeline PRIVATE ${CMAKE_SOURCE_DIR}/src)
+  target_link_libraries(csvqr_bench_pipeline PRIVATE
+    benchmark::benchmark
+    fmt::fmt
+  )
+  target_compile_definitions(csvqr_bench_pipeline PRIVATE BENCHMARK_STATIC_DEFINE)
 endif()
 
 add_executable(gen_synth_csv scripts/gen_synth_csv.cpp)
